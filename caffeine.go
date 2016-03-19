@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -51,8 +52,16 @@ func main() {
 }
 
 func initDb() gorm.DB {
-	// TODO: Add to env variables
-	db, err := gorm.Open("mysql", "root@/caffeine?charset=utf8&parseTime=True&loc=Local")
+	dbUsername := os.Getenv("CAFFEINE_DB_USERNAME")
+	dbPassword := os.Getenv("CAFFEINE_DB_PASSWORD")
+	dbName := os.Getenv("CAFFEINE_DB_NAME")
+
+	dbConnStr := fmt.Sprintf(
+		"%s:%s@/%s?charset=utf8&parseTime=True&loc=Local",
+		dbUsername,
+		dbPassword,
+		dbName)
+	db, err := gorm.Open("mysql", dbConnStr)
 	if err != nil {
 		panic("failed to connect to database")
 	}
