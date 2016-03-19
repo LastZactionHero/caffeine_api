@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -30,28 +29,18 @@ type EnergyLevel struct {
 	level         uint
 }
 
+var db gorm.DB
+
 func main() {
 	fmt.Println("starting up")
 
-	db := initDb()
+	db = initDb()
 
 	// TODO: Init consumables on the first run
 	// dbInitSeedConsumables(db)
 	// db.Create(&Consumable{Name: "Small Coffee", Amount: 95})
-	// Demo, drink coffee
-	// var coffee Consumable
-	// db.Where("name = ?", "Small Coffee").Find(&coffee)
-	// ingest(db, coffee)
 
-	// Demo, calculate amount in body
-	mg := mgInBody(db)
-	fmt.Println(mg)
-
-	duration, _ := time.ParseDuration("1h")
-	fmt.Println(duration)
-	timeAtDuration := time.Now().Add(duration)
-	fmt.Println(timeAtDuration)
-	fmt.Println(mgInBodyAtTime(db, timeAtDuration))
+	initServer()
 }
 
 func initDb() gorm.DB {
