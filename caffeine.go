@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -25,8 +26,14 @@ type Consumption struct {
 type EnergyLevel struct {
 	gorm.Model
 	Consumption   Consumption
-	ConsumptionID Consumption
-	level         uint
+	ConsumptionID uint
+	Level         uint
+}
+
+// MgAtTime represents the amount of caffeine in the body at a particular time
+type MgAtTime struct {
+	Amount float64   `json:"mg"`
+	Time   time.Time `json:"time"`
 }
 
 var db gorm.DB

@@ -11,8 +11,10 @@ const caffeineHalfLife float64 = 5.7
 const daysToTrack int = 2
 
 // Ingest a single Consumable
-func ingest(db gorm.DB, c Consumable) {
-	db.Create(&Consumption{Consumable: c, ConsumableID: c.ID})
+func ingest(db gorm.DB, c Consumable) Consumption {
+	consumption := Consumption{Consumable: c, ConsumableID: c.ID}
+	db.Create(&consumption)
+	return consumption
 }
 
 // Find all caffeine ingestions since a point in time
@@ -28,6 +30,9 @@ func amountRemainingAtTime(consumption Consumption, time time.Time) float64 {
 
 	timeElapsed := time.Sub(consumedAt)
 	hoursElapsed := timeElapsed.Hours()
+	if hoursElapsed < 0 {
+		return 0
+	}
 
 	remaining := float64(mgConsumed) * math.Pow(0.5, (hoursElapsed/float64(caffeineHalfLife)))
 	return remaining
@@ -49,4 +54,18 @@ func mgInBodyAtTime(db gorm.DB, time time.Time) float64 {
 		totalMg += mgRemaining
 	}
 	return totalMg
+}
+
+func mgOverTime(db gorm.DB, startTime time.Time, endTime time.Time, increment time.Duration) []MgAtTime {
+	var points []MgAtTime
+
+	currentTime := startTime
+	for currentTime.Before(endTime) {
+		points = append(points, MgAtTime{
+			Time:   currentTime,
+			Amount: mgInBodyAtTime(db, currentTime)})
+		currentTime = currentTime.Add(increment)
+	}
+
+	return points
 }
