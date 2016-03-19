@@ -65,6 +65,7 @@ func initDb() gorm.DB {
 	if err != nil {
 		panic("failed to connect to database")
 	}
+
 	dbCreateTables(db)
 
 	return *db

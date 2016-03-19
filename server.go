@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -20,7 +21,7 @@ func initServer() {
 	router.HandleFunc("/status/now", statusHandler).Methods("GET")
 	router.HandleFunc("/status/time", statusTimeHandler).Methods("GET")
 	http.Handle("/", router)
-	http.ListenAndServe(":8181", nil)
+	http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("CAFFEINE_PORT")), nil)
 }
 
 // Create a Consumable
