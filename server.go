@@ -12,10 +12,32 @@ import (
 func initServer() {
 	router := mux.NewRouter()
 	router.HandleFunc("/consumables", consumablesListHandler).Methods("GET")
+	router.HandleFunc("/consumables", consumablesCreateHandler).Methods("POST")
 	router.HandleFunc("/ingest", ingestHandler).Methods("POST")
 	router.HandleFunc("/status/now", statusHandler).Methods("GET")
 	http.Handle("/", router)
 	http.ListenAndServe(":8181", nil)
+}
+
+// Create a Consumable
+func consumablesCreateHandler(w http.ResponseWriter, r *http.Request) {
+	type consumableJSON struct {
+		Name   string `json:"name"`
+		Amount uint   `json:"amount"`
+	}
+
+	body, _ := ioutil.ReadAll(r.Body)
+	var consumableForm consumableJSON
+	err := json.Unmarshal(body, &consumableForm)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	consumable := Consumable{Name: consumableForm.Name, Amount: consumableForm.Amount}
+	db.Create(&consumable)
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // Index of Consumables
