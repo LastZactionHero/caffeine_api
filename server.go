@@ -16,7 +16,9 @@ import (
 func initServer() {
 	router := mux.NewRouter()
 	router.HandleFunc("/consumables", consumablesListHandler).Methods("GET")
+	router.HandleFunc("/consumables", optionsHandler).Methods("OPTIONS")
 	router.HandleFunc("/consumables", consumablesCreateHandler).Methods("POST")
+	router.HandleFunc("/ingest", optionsHandler).Methods("OPTIONS")
 	router.HandleFunc("/ingest", ingestHandler).Methods("POST")
 	router.HandleFunc("/status/now", statusHandler).Methods("GET")
 	router.HandleFunc("/status/time", statusTimeHandler).Methods("GET")
@@ -41,7 +43,7 @@ func consumablesCreateHandler(w http.ResponseWriter, r *http.Request) {
 
 	consumable := Consumable{Name: consumableForm.Name, Amount: consumableForm.Amount}
 	db.Create(&consumable)
-
+	apiApplyCorsHeaders(w, r)
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -70,6 +72,7 @@ func consumablesListHandler(w http.ResponseWriter, r *http.Request) {
 	// Write JSON to response
 	jsonResponse, _ := json.Marshal(response)
 	w.Header().Set("Content-Type", "application/json")
+	apiApplyCorsHeaders(w, r)
 	w.Write(jsonResponse)
 }
 
@@ -116,6 +119,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 
 	jsonResponse, _ := json.Marshal(response{MgInBody: mgInBody(db)})
 	w.Header().Set("Content-Type", "application/json")
+	apiApplyCorsHeaders(w, r)
 	w.Write(jsonResponse)
 }
 
@@ -133,5 +137,7 @@ func statusTimeHandler(w http.ResponseWriter, r *http.Request) {
 	points := mgOverTime(db, startTime, endTime, increment)
 
 	jsonResponse, _ := json.Marshal(points)
+	w.Header().Set("Content-Type", "application/json")
+	apiApplyCorsHeaders(w, r)
 	w.Write(jsonResponse)
 }
