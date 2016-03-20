@@ -30,8 +30,10 @@ func initServer() {
 func consumablesCreateHandler(w http.ResponseWriter, r *http.Request) {
 	type consumableJSON struct {
 		Name   string `json:"name"`
-		Amount uint   `json:"amount"`
+		Amount string `json:"amount"`
 	}
+
+	apiApplyCorsHeaders(w, r)
 
 	body, _ := ioutil.ReadAll(r.Body)
 	var consumableForm consumableJSON
@@ -41,9 +43,15 @@ func consumablesCreateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	consumable := Consumable{Name: consumableForm.Name, Amount: consumableForm.Amount}
+	amount, err := strconv.Atoi(consumableForm.Amount)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	consumable := Consumable{Name: consumableForm.Name, Amount: uint(amount)}
 	db.Create(&consumable)
-	apiApplyCorsHeaders(w, r)
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -109,6 +117,7 @@ func ingestHandler(w http.ResponseWriter, r *http.Request) {
 		Level:       requestBody.EnergyLevel,
 		Consumption: consumption})
 
+	apiApplyCorsHeaders(w, r)
 	w.WriteHeader(http.StatusNoContent)
 }
 
